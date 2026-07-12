@@ -5,7 +5,14 @@ export async function GET() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("assets")
-    .select(`id, asset_tag, name, serial_number, status, condition, manufacturer, model, is_bookable, created_at, asset_categories(name)`)
+    .select(
+      `
+      id, asset_tag, name, serial_number, status, condition,
+      manufacturer, model, photo_url, is_bookable,
+      assigned_to, location, purchase_date, value, created_at,
+      asset_categories(name)
+    `,
+    )
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -25,8 +32,13 @@ export async function POST(req: Request) {
       model: body.model || null,
       condition: body.condition,
       is_bookable: body.is_bookable,
-      status: "AVAILABLE",
-      asset_tag: "",
+      status: body.status || "AVAILABLE",
+      asset_tag: body.asset_tag || "",
+      category_id: body.category_id || null,
+      assigned_to: body.assigned_to || null,
+      location: body.location || null,
+      purchase_date: body.purchase_date || null,
+      value: body.value ?? null,
     })
     .select()
     .single();
