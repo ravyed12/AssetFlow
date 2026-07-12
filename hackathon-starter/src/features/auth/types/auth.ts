@@ -1,14 +1,31 @@
 import type { ActionResponse } from "@/types";
 
+import type { LoginFormValues } from "../schemas/login-schema";
 import type { SignupFormValues } from "../schemas/signup-schema";
 
-export type SignupFieldErrors = Partial<
-  Record<keyof SignupFormValues, string[] | undefined>
+type FormFieldErrors<TFormValues> = Partial<
+  Record<keyof TFormValues, string[] | undefined>
 >;
 
-export type SignupActionState = ActionResponse<{ redirectTo: string }> & {
-  fieldErrors?: SignupFieldErrors;
+type AuthActionState<TFormValues> = ActionResponse<{ redirectTo: string }> & {
+  fieldErrors?: FormFieldErrors<TFormValues>;
 };
+
+export type LoginFieldErrors = FormFieldErrors<LoginFormValues>;
+export type SignupFieldErrors = FormFieldErrors<SignupFormValues>;
+
+export type LoginActionState = AuthActionState<LoginFormValues>;
+export type SignupActionState = AuthActionState<SignupFormValues>;
+
+export interface LoginUserInput {
+  email: string;
+  password: string;
+}
+
+export interface LoginUserResult {
+  success: boolean;
+  error?: string;
+}
 
 export interface SignUpEmployeeInput {
   fullName: string;
