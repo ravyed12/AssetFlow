@@ -6,14 +6,16 @@ import { SearchBar } from "@/components/common/SearchBar";
 import { Button } from "@/components/ui/Button";
 
 interface ToolbarProps {
-  search: string;
+  onAddClick: () => void;
   onSearchChange: (value: string) => void;
+  search: string;
   totalEmployees: number;
 }
 
 export default function Toolbar({
-  search,
+  onAddClick,
   onSearchChange,
+  search,
   totalEmployees,
 }: ToolbarProps) {
   return (
@@ -43,7 +45,7 @@ export default function Toolbar({
 
         </div>
 
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={onAddClick}>
 
           <Plus className="h-4 w-4" />
 

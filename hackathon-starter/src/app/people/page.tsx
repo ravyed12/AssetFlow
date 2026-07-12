@@ -1,5 +1,23 @@
-import PeoplePage from "@/features/people/page";
+import { Container, DashboardLayout } from "@/components/layout";
+import { Error } from "@/components/common";
+import { PeopleScreen } from "@/features/people/components/people-screen";
+import { getPeopleManagementData } from "@/features/people/services/employee.service";
 
-export default function Page() {
-  return <PeoplePage />;
+export default async function Page() {
+  const result = await getPeopleManagementData();
+
+  return (
+    <DashboardLayout>
+      <Container size="2xl" className="space-y-6">
+        {result.success ? (
+          <PeopleScreen initialData={result.data} />
+        ) : (
+          <Error
+            message={result.error?.message}
+            title="Unable to load people"
+          />
+        )}
+      </Container>
+    </DashboardLayout>
+  );
 }

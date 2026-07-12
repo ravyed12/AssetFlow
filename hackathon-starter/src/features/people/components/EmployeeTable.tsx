@@ -17,9 +17,13 @@ import {
 } from "@/components/ui/Table";
 
 import { Employee } from "../types";
+import EmployeeMenu from "./EmployeeMenu";
 
 interface EmployeeTableProps {
   employees: Employee[];
+  onEdit: (employee: Employee) => void;
+  onToggleStatus: (employee: Employee) => void;
+  pendingEmployeeId: string | null;
 }
 
 function getStatusVariant(status: Employee["status"]) {
@@ -37,6 +41,9 @@ function getStatusVariant(status: Employee["status"]) {
 
 export default function EmployeeTable({
   employees,
+  onEdit,
+  onToggleStatus,
+  pendingEmployeeId,
 }: EmployeeTableProps) {
   return (
     <Card className="overflow-hidden rounded-2xl">
@@ -154,14 +161,12 @@ export default function EmployeeTable({
 
               <TableCell>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                >
-
-                  <MoreHorizontal className="h-5 w-5" />
-
-                </Button>
+                <EmployeeMenu
+                  employee={employee}
+                  onEdit={onEdit}
+                  onToggleStatus={onToggleStatus}
+                  disabled={pendingEmployeeId === employee.id}
+                />
 
               </TableCell>
 
