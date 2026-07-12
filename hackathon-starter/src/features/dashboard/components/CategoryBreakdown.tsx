@@ -1,7 +1,24 @@
+import { NoData } from "@/components/common";
+
 import type { CategoryCount } from "../types";
 
 export function CategoryBreakdown({ categories }: { categories: CategoryCount[] }) {
   const total = categories.reduce((sum, c) => sum + c.count, 0);
+
+  if (total === 0) {
+    return (
+      <div className="rounded-xl border border-neutral-200 bg-white p-5">
+        <div className="mb-4">
+          <h2 className="text-[15px] font-bold text-neutral-900">By category</h2>
+          <p className="mt-0.5 text-xs text-neutral-400">{total} total</p>
+        </div>
+        <NoData
+          title="No category data available"
+          description="Categories will appear here once assets are registered."
+        />
+      </div>
+    );
+  }
 
   let cursor = 0;
   const segments = categories.map((cat) => {
