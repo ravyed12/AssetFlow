@@ -10,6 +10,9 @@
 !.yarn/releases
 !.yarn/versions
 
+.env.local
+node_modules/
+
 # testing
 /coverage
 
