@@ -1,7 +1,7 @@
 "use client";
 
 import { Calendar, PlayCircle } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import Link from "next/link";
 
 export function MaintenanceReminders() {
   return (
@@ -9,9 +9,9 @@ export function MaintenanceReminders() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[15px] font-bold text-[#0F1117]">Reminders</h3>
-        <button type="button" className="text-[12px] font-bold text-[#3CA079] hover:underline">
+        <Link href="/maintenance" className="text-[12px] font-bold text-[#3CA079] hover:underline">
           View all
-        </button>
+        </Link>
       </div>
 
       {/* Reminder body */}
@@ -36,10 +36,13 @@ export function MaintenanceReminders() {
 
       {/* Button */}
       <div className="mt-4">
-        <Button className="w-full bg-[#064E3B] text-white hover:bg-[#043E2E] gap-2 py-3 rounded-xl shadow-md shadow-emerald-950/10">
+        <Link
+          href="/maintenance"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#064E3B] text-white hover:bg-[#043E2E] py-2.5 text-[13px] font-semibold transition-all shadow-md shadow-emerald-950/10 active:scale-[0.97]"
+        >
           <PlayCircle size={16} strokeWidth={2.5} />
           <span>Start Maintenance</span>
-        </Button>
+        </Link>
       </div>
     </div>
   );
