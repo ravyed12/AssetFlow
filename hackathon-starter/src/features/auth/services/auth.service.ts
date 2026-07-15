@@ -96,26 +96,22 @@ export async function signUpEmployee({
     };
   }
 
-  const profilePayload: CreateProfilePayload = {
-    id: user.id,
-    full_name: normalizedFullName,
-    email: user.email.toLowerCase(),
-    role: "EMPLOYEE",
-    active: true,
-    department_id: null,
-  };
-
-  const { error: profileError } = await supabase
+  // The DB trigger (handle_new_user) auto-creates the profile row.
+  // This upsert is a backup in case the trigger hasn't run yet or
+  // the user signed up without email confirmation enabled.
+  await supabase
     .from("profiles")
-    .insert(profilePayload);
+    .upsert(
+      {
+        id: user.id,
+        full_name: normalizedFullName,
+        email: user.email.toLowerCase(),
+        role: "EMPLOYEE" as const,
+        active: true,
+      },
+      { onConflict: "id", ignoreDuplicates: false }
+    );
 
-  if (profileError) {
-    return {
-      success: false,
-      error:
-        "Your account was created, but we couldn't finish your profile setup. Please try signing in again.",
-    };
-  }
 
   return {
     success: true,

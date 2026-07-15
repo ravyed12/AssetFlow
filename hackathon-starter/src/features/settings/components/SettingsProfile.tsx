@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Camera, Check, Eye, EyeOff, Loader2, X } from "lucide-react";
+import { Check, Eye, EyeOff, Loader2, X } from "lucide-react";
 import { type Profile } from "@/features/settings/actions";
 import { getInitials, getAvatarStyle } from "@/lib/asset-ui";
 
@@ -67,28 +67,17 @@ function Field({
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
-function Avatar({ name, avatarUrl }: { name: string; avatarUrl: string | null }) {
+function Avatar({ name }: { name: string }) {
   const style = getAvatarStyle(name || "AD");
   const initials = getInitials(name || "Admin User");
 
   return (
     <div className="relative h-16 w-16 flex-shrink-0">
-      {avatarUrl ? (
-        <img src={avatarUrl} alt={name} className="h-16 w-16 rounded-full object-cover" />
-      ) : (
-        <div
-          className={`flex h-16 w-16 items-center justify-center rounded-full ${style.bg} ${style.text} text-[18px] font-semibold`}
-        >
-          {initials}
-        </div>
-      )}
-      <button
-        type="button"
-        title="Change photo (coming soon)"
-        className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-zinc-900 dark:bg-zinc-50 text-white hover:bg-zinc-700 dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
+      <div
+        className={`flex h-16 w-16 items-center justify-center rounded-full ${style.bg} ${style.text} text-[18px] font-semibold`}
       >
-        <Camera size={11} />
-      </button>
+        {initials}
+      </div>
     </div>
   );
 }
@@ -100,7 +89,6 @@ function ProfileSection({ profile }: { profile: Profile }) {
   const [firstName, setFirstName] = useState(nameParts[0] ?? "");
   const [lastName, setLastName] = useState(nameParts.slice(1).join(" ") ?? "");
   const [phone, setPhone] = useState(profile.phone ?? "");
-  const [jobTitle, setJobTitle] = useState(profile.job_title ?? "");
   const [saving, setSaving] = useState(false);
   const [alert, setAlert] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
@@ -119,7 +107,6 @@ function ProfileSection({ profile }: { profile: Profile }) {
         body: JSON.stringify({
           full_name: `${firstName} ${lastName}`.trim(),
           phone: phone || null,
-          job_title: jobTitle || null,
         }),
       });
       const data = await res.json();
@@ -148,7 +135,7 @@ function ProfileSection({ profile }: { profile: Profile }) {
 
       {/* Avatar row */}
       <div className="mb-6 flex items-center gap-4">
-        <Avatar name={fullName} avatarUrl={profile.avatar_url} />
+        <Avatar name={fullName} />
         <div>
           <p className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">{fullName}</p>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -191,16 +178,6 @@ function ProfileSection({ profile }: { profile: Profile }) {
           value={phone}
           onChange={setPhone}
           placeholder="+1 (555) 000-0000"
-        />
-      </div>
-
-      <div className="mt-4">
-        <Field
-          label="Job title"
-          id="job-title"
-          value={jobTitle}
-          onChange={setJobTitle}
-          placeholder="e.g. System Administrator"
         />
       </div>
 

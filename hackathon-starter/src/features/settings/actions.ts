@@ -5,9 +5,8 @@ export type Profile = {
   full_name: string | null;
   email: string | null;
   phone: string | null;
-  job_title: string | null;
   role: string | null;
-  avatar_url: string | null;
+  active: boolean | null;
 };
 
 export async function getProfile(): Promise<Profile | null> {
@@ -21,7 +20,7 @@ export async function getProfile(): Promise<Profile | null> {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name, email, phone, job_title, role, avatar_url")
+    .select("id, full_name, email, phone, role, active")
     .eq("id", user.id)
     .single();
 
@@ -32,9 +31,8 @@ export async function getProfile(): Promise<Profile | null> {
       full_name: null,
       email: user.email ?? null,
       phone: null,
-      job_title: null,
       role: null,
-      avatar_url: null,
+      active: true,
     };
   }
 

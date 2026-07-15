@@ -1,13 +1,18 @@
 import * as React from "react";
-
+import { Sidebar } from "./Sidebar";
+import { TopBar } from "./TopBar";
 import { cn } from "@/lib/cn";
 
 export interface DashboardLayoutProps
   extends React.HTMLAttributes<HTMLDivElement> {
   contentClassName?: string;
   footer?: React.ReactNode;
+  /** Optional custom navbar — defaults to <TopBar crumb=""> */
   navbar?: React.ReactNode;
+  /** Optional custom sidebar — defaults to <Sidebar /> */
   sidebar?: React.ReactNode;
+  /** Page title shown in the TopBar breadcrumb */
+  crumb?: string;
 }
 
 function DashboardLayout({
@@ -17,25 +22,24 @@ function DashboardLayout({
   footer,
   navbar,
   sidebar,
+  crumb = "",
   ...props
 }: DashboardLayoutProps) {
+  const sidebarNode  = sidebar  ?? <Sidebar />;
+  const navbarNode   = navbar   ?? <TopBar crumb={crumb} />;
+
   return (
     <div
-      className={cn(
-        "min-h-screen bg-white text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50",
-        className,
-      )}
+      className={cn("flex h-screen bg-[#F7F8FA]", className)}
       {...props}
     >
-      {navbar}
-      <div className="flex min-h-[calc(100vh-4rem)]">
-        {sidebar}
-        <div className="flex min-w-0 flex-1 flex-col">
-          <main className={cn("flex-1 p-4 sm:p-6 lg:p-8", contentClassName)}>
-            {children}
-          </main>
-          {footer}
-        </div>
+      {sidebarNode}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {navbarNode}
+        <main className={cn("flex-1 overflow-y-auto p-6", contentClassName)}>
+          {children}
+        </main>
+        {footer}
       </div>
     </div>
   );

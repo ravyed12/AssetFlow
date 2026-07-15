@@ -20,7 +20,6 @@ export async function PATCH(req: Request) {
     .update({
       full_name: body.full_name ?? null,
       phone: body.phone ?? null,
-      job_title: body.job_title ?? null,
     })
     .eq("id", user.id);
 

@@ -1,26 +1,71 @@
 import * as React from "react";
-
 import { cn } from "@/lib/cn";
 
-export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  error?: boolean;
+}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type = "text", ...props }, ref) => {
+  ({ className, type, leftIcon, rightIcon, error, ...props }, ref) => {
+    if (leftIcon || rightIcon) {
+      return (
+        <div className="relative flex items-center">
+          {leftIcon && (
+            <span className="absolute left-3 flex items-center text-[#9CA3AF]">
+              {leftIcon}
+            </span>
+          )}
+          <input
+            ref={ref}
+            type={type}
+            className={cn(
+              "flex h-9 w-full rounded-xl border bg-white px-3 py-2 text-[13px] text-[#0F1117]",
+              "placeholder:text-[#9CA3AF]",
+              "shadow-sm",
+              "transition-all duration-150",
+              "focus:outline-none focus:border-[#4F46E5] focus:ring-3 focus:ring-[#4F46E5]/15",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              leftIcon && "pl-9",
+              rightIcon && "pr-9",
+              error
+                ? "border-red-400 focus:border-red-500 focus:ring-red-500/15"
+                : "border-[#E5E7EB]",
+              className
+            )}
+            {...props}
+          />
+          {rightIcon && (
+            <span className="absolute right-3 flex items-center text-[#9CA3AF]">
+              {rightIcon}
+            </span>
+          )}
+        </div>
+      );
+    }
+
     return (
       <input
         ref={ref}
         type={type}
         className={cn(
-          "flex h-10 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-950 shadow-sm transition-colors outline-none placeholder:text-zinc-500 focus-visible:border-zinc-400 focus-visible:ring-2 focus-visible:ring-zinc-950/10 aria-invalid:border-red-500 aria-invalid:ring-red-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-400 dark:focus-visible:border-zinc-700 dark:focus-visible:ring-white/10 dark:aria-invalid:border-red-400 dark:aria-invalid:ring-red-400/10",
-          className,
+          "flex h-9 w-full rounded-xl border bg-white px-3 py-2 text-[13px] text-[#0F1117]",
+          "placeholder:text-[#9CA3AF]",
+          "shadow-sm",
+          "transition-all duration-150",
+          "focus:outline-none focus:border-[#4F46E5] focus:ring-3 focus:ring-[#4F46E5]/15",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+          error
+            ? "border-red-400 focus:border-red-500 focus:ring-red-500/15"
+            : "border-[#E5E7EB]",
+          className
         )}
         {...props}
       />
     );
-  },
+  }
 );
 
 Input.displayName = "Input";
-
 export { Input };

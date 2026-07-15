@@ -38,8 +38,6 @@ export interface CreateProfilePayload {
   full_name: string;
   email: string;
   role: "EMPLOYEE";
-  active: boolean;
-  department_id: null;
 }
 
 export interface SignUpEmployeeResult {

@@ -1,5 +1,4 @@
 import * as React from "react";
-
 import { cn } from "@/lib/cn";
 
 export interface PageHeaderProps
@@ -21,29 +20,27 @@ function PageHeader({
   return (
     <div
       className={cn(
-        "flex flex-col gap-4 border-b border-zinc-200 pb-6 dark:border-zinc-800 sm:flex-row sm:items-start sm:justify-between",
-        className,
+        "flex flex-col gap-4 pb-6 sm:flex-row sm:items-start sm:justify-between",
+        className
       )}
       {...props}
     >
-      <div className="space-y-2">
-        {eyebrow ? (
-          <div className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+      <div className="space-y-1.5">
+        {eyebrow && (
+          <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-widest text-[#6B7280]">
             {eyebrow}
           </div>
-        ) : null}
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
-            {title}
-          </h1>
-          {description ? (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              {description}
-            </p>
-          ) : null}
-        </div>
+        )}
+        <h1 className="text-[22px] font-bold tracking-tight text-[#0F1117] leading-tight">
+          {title}
+        </h1>
+        {description && (
+          <p className="text-[13px] text-[#6B7280] leading-relaxed">{description}</p>
+        )}
       </div>
-      {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
+      {actions && (
+        <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
+      )}
     </div>
   );
 }
