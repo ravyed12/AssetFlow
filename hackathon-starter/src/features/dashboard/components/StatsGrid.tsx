@@ -25,9 +25,8 @@ export function StatsGrid({ stats }: { stats: StatCard[] }) {
       onMouseLeave={() => setHoveredIdx(null)}
     >
       {displayStats.map((stat, idx) => {
-        // If no card is hovered, the first card (Total Assets, idx 0) is active.
-        // If a card is hovered, only that hovered card is active.
-        const isActive = hoveredIdx === null ? idx === 0 : hoveredIdx === idx;
+        // If a card is hovered, only that hovered card is active. No card is active by default.
+        const isActive = hoveredIdx === idx;
         const targetHref = TARGET_LINKS[idx] || "/";
 
         return (
