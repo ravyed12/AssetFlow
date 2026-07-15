@@ -20,7 +20,10 @@ export function StatsGrid({ stats }: { stats: StatCard[] }) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div 
+      className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      onMouseLeave={() => setHoveredIdx(null)}
+    >
       {displayStats.map((stat, idx) => {
         // If no card is hovered, the first card (Total Assets, idx 0) is active.
         // If a card is hovered, only that hovered card is active.
@@ -32,7 +35,6 @@ export function StatsGrid({ stats }: { stats: StatCard[] }) {
             key={stat.label}
             href={targetHref}
             onMouseEnter={() => setHoveredIdx(idx)}
-            onMouseLeave={() => setHoveredIdx(null)}
             className={`group relative overflow-hidden rounded-2xl p-5 border transition-all duration-300 card-hover block ${
               isActive
                 ? "bg-[#064E3B] border-[#064E3B] text-white shadow-lg shadow-emerald-950/20 scale-[1.01]"
