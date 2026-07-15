@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   DashboardHeader,
   AlertBanner,
@@ -10,6 +11,7 @@ import {
   TeamCollaboration,
   AssetUtilizationProgress,
   LiveTimeTracker,
+  ImportDialog,
 } from "./index";
 import type { DashboardData } from "../types";
 
@@ -19,9 +21,10 @@ interface DashboardScreenProps {
 
 export function DashboardScreen({ initialData }: DashboardScreenProps) {
   const { org, alert, stats, recentAssets } = initialData;
+  const [importOpen, setImportOpen] = useState(false);
 
   const handleSync = () => {
-    alert("Import data functionality coming soon!");
+    setImportOpen(true);
   };
 
   const handleRegisterAsset = () => {
@@ -30,6 +33,8 @@ export function DashboardScreen({ initialData }: DashboardScreenProps) {
 
   return (
     <div className="mx-auto w-full max-w-[1400px] px-7 pb-14 pt-6 space-y-6">
+      <ImportDialog open={importOpen} onOpenChange={setImportOpen} />
+
       {/* Header */}
       <DashboardHeader
         org={org}

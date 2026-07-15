@@ -431,3 +431,150 @@ export async function toggleAssetStatus({
     },
   };
 }
+
+export async function importAssets(rawAssets: any[]) {
+  const supabase = await createClient();
+
+  // 1. Fetch existing categories and locations
+  const [categoriesResult, locationsResult] = await Promise.all([
+    supabase.from("asset_categories").select("id, name"),
+    supabase.from("asset_locations").select("id, name"),
+  ]);
+
+  const categories = categoriesResult.data || [];
+  const locations = locationsResult.data || [];
+
+  const categoryMap = new Map<string, string>(
+    categories.map((c) => [c.name.toLowerCase(), c.id]),
+  );
+  const locationMap = new Map<string, string>(
+    locations.map((l) => [l.name.toLowerCase(), l.id]),
+  );
+
+  const assetsToInsert: any[] = [];
+
+  for (const raw of rawAssets) {
+    const name = raw.name || raw.asset_name || "Unnamed Asset";
+    let assetTag = raw.asset_tag || raw.tag || raw.assetTag;
+    
+    // Auto-generate tag if missing
+    if (!assetTag) {
+      assetTag = `AST-${Math.floor(100000 + Math.random() * 900000)}`;
+    }
+
+    // Resolve Category
+    const categoryName = raw.category || raw.category_name || raw.categoryName || "Uncategorized";
+    let categoryId = categoryMap.get(categoryName.toLowerCase());
+
+    if (!categoryId) {
+      // Auto-create category
+      const { data: newCat, error: newCatErr } = await supabase
+        .from("asset_categories")
+        .insert({ name: categoryName, active: true })
+        .select("id")
+        .maybeSingle();
+
+      if (newCat && !newCatErr) {
+        categoryId = newCat.id;
+        categoryMap.set(categoryName.toLowerCase(), categoryId);
+      } else {
+        // Fallback to first existing category or return error
+        categoryId = categories[0]?.id;
+      }
+    }
+
+    if (!categoryId) {
+      return {
+        success: false as const,
+        error: {
+          message: `Unable to map or create category "${categoryName}"`,
+        },
+      };
+    }
+
+    // Resolve Location
+    let locationId: string | null = null;
+    const locationName = raw.location || raw.location_name || raw.locationName;
+    if (locationName) {
+      locationId = locationMap.get(locationName.toLowerCase()) || null;
+
+      if (!locationId) {
+        // Auto-create location
+        const { data: newLoc, error: newLocErr } = await supabase
+          .from("asset_locations")
+          .insert({ name: locationName, active: true })
+          .select("id")
+          .maybeSingle();
+
+        if (newLoc && !newLocErr) {
+          locationId = newLoc.id;
+          locationMap.set(locationName.toLowerCase(), locationId);
+        }
+      }
+    }
+
+    // Parse numeric cost
+    let acquisitionCost: number | null = null;
+    const rawCost = raw.acquisition_cost || raw.cost || raw.acquisitionCost;
+    if (rawCost != null) {
+      const parsed = Number(String(rawCost).replace(/[^0-9.]/g, ""));
+      if (!isNaN(parsed)) {
+        acquisitionCost = parsed;
+      }
+    }
+
+    // Bookable boolean parsing
+    let isBookable = false;
+    const rawBookable = raw.is_bookable || raw.bookable || raw.isBookable;
+    if (rawBookable != null) {
+      isBookable = String(rawBookable).toLowerCase() === "true" || rawBookable === true || rawBookable === 1;
+    }
+
+    // Status mapping
+    let status = String(raw.status || "AVAILABLE").toUpperCase();
+    const VALID_STATUSES = ["AVAILABLE", "ALLOCATED", "UNDER_MAINTENANCE", "WRITTEN_OFF"];
+    if (!VALID_STATUSES.includes(status)) {
+      if (status === "ACTIVE" || status === "IN_USE") status = "ALLOCATED";
+      else if (status === "MAINTENANCE") status = "UNDER_MAINTENANCE";
+      else status = "AVAILABLE";
+    }
+
+    assetsToInsert.push({
+      asset_tag: assetTag,
+      name,
+      category_id: categoryId,
+      location_id: locationId,
+      manufacturer: raw.manufacturer || null,
+      model: raw.model || null,
+      serial_number: raw.serial_number || raw.serial || raw.serialNumber || null,
+      acquisition_date: raw.acquisition_date || raw.acquisitionDate || null,
+      acquisition_cost: acquisitionCost,
+      warranty_expiry: raw.warranty_expiry || raw.warrantyExpiry || null,
+      status,
+      is_bookable: isBookable,
+      updated_at: new Date().toISOString(),
+    });
+  }
+
+  const { data, error } = await supabase
+    .from("assets")
+    .insert(assetsToInsert)
+    .select("id");
+
+  if (error) {
+    return {
+      success: false as const,
+      error: {
+        message: error.message || "Failed to bulk import assets.",
+      },
+    };
+  }
+
+  return {
+    success: true as const,
+    data: {
+      count: data.length,
+    },
+  };
+}
+

@@ -11,6 +11,7 @@ import {
 } from "../schemas/asset-schema";
 import {
   createAsset,
+  importAssets,
   toggleAssetStatus,
   updateAsset,
 } from "../services/asset.service";
@@ -172,3 +173,37 @@ export async function toggleAssetStatusAction(
     };
   }
 }
+
+export async function importAssetsAction(
+  assets: any[],
+): Promise<{ success: boolean; error?: { message: string }; count?: number }> {
+  try {
+    // Basic server-side mapping & schema validation can go here if needed,
+    // but we can trust the mapped inputs from the client or do standard insertion.
+    const result = await importAssets(assets);
+
+    if (!result.success) {
+      return {
+        success: false,
+        error: {
+          message: result.error?.message ?? "Unable to bulk import assets.",
+        },
+      };
+    }
+
+    revalidateAssetPaths();
+
+    return {
+      success: true,
+      count: result.data.count,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: {
+        message: "Something went wrong while importing assets. Please try again.",
+      },
+    };
+  }
+}
+
