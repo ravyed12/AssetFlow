@@ -1,4 +1,7 @@
+"use client";
+
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 import { cn } from "@/lib/cn";
@@ -25,6 +28,7 @@ function DashboardLayout({
   crumb = "",
   ...props
 }: DashboardLayoutProps) {
+  const pathname = usePathname();
   const sidebarNode  = sidebar  ?? <Sidebar />;
   const navbarNode   = navbar   ?? <TopBar crumb={crumb} />;
 
@@ -37,7 +41,9 @@ function DashboardLayout({
       <div className="flex flex-1 flex-col overflow-hidden">
         {navbarNode}
         <main className={cn("flex-1 overflow-y-auto p-6", contentClassName)}>
-          {children}
+          <div key={pathname} className="animate-page-in">
+            {children}
+          </div>
         </main>
         {footer}
       </div>
