@@ -69,7 +69,7 @@ export function TopBar({
   const initials = getInitials(userName);
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#EAECF0] bg-white/80 px-6 backdrop-blur-sm">
+    <header className="relative z-50 flex h-14 shrink-0 items-center justify-between border-b border-[#EAECF0] bg-white/80 px-6 backdrop-blur-sm">
       {/* Left */}
       <div className="flex items-center gap-3">
         {crumb && (

@@ -56,17 +56,7 @@ export function AssetAnalytics() {
         </button>
       </div>
 
-      {/* SVG Definitions for patterns */}
-      <svg className="absolute h-0 w-0">
-        <defs>
-          <pattern id="diagonalHatchActive" width="10" height="10" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
-            <line x1="0" y1="0" x2="0" y2="10" stroke="#059669" strokeWidth="3" />
-          </pattern>
-          <pattern id="diagonalHatchInactive" width="10" height="10" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
-            <line x1="0" y1="0" x2="0" y2="10" stroke="#CBD5E1" strokeWidth="2.5" />
-          </pattern>
-        </defs>
-      </svg>
+
 
       {/* Chart container */}
       <div
@@ -91,9 +81,8 @@ export function AssetAnalytics() {
           const isLight = bar.type === "solid-light";
           const isActive = activeIndex === idx;
 
-          // Compute a dynamic display value for the tooltip (e.g. mapping value to percentage)
-          // Tuesday displays 74% in Donezo mockup, let's use that pattern
-          const displayPct = idx === 2 ? 74 : Math.round(bar.value * 0.95);
+          // Use the exact value from the data
+          const displayPct = bar.value;
 
           return (
             <div
@@ -123,8 +112,8 @@ export function AssetAnalytics() {
                     transformOrigin: "bottom center",
                     background: isStriped
                       ? isActive
-                        ? "url(#diagonalHatchActive)"
-                        : "url(#diagonalHatchInactive)"
+                        ? "repeating-linear-gradient(45deg, #059669, #059669 3px, transparent 3px, transparent 8px)"
+                        : "repeating-linear-gradient(45deg, #CBD5E1, #CBD5E1 2px, transparent 2px, transparent 6px)"
                       : isLight
                       ? isActive
                         ? "#10B981"

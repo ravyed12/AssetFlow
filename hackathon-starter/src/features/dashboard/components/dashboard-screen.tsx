@@ -21,7 +21,7 @@ export function DashboardScreen({ initialData }: DashboardScreenProps) {
   const { org, alert, stats, recentAssets } = initialData;
 
   const handleSync = () => {
-    window.location.reload();
+    alert("Import data functionality coming soon!");
   };
 
   const handleRegisterAsset = () => {
