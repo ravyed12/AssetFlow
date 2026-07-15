@@ -1,18 +1,18 @@
 "use client";
 
+import { useState, useRef } from "react";
 import { Info } from "lucide-react";
 
 interface BarData {
   label: string;
   value: number;
   type: "striped" | "solid-dark" | "solid-light";
-  tooltip?: string;
 }
 
 const BARS: BarData[] = [
   { label: "S", value: 35, type: "striped" },
   { label: "M", value: 70, type: "solid-dark" },
-  { label: "T", value: 55, type: "solid-light", tooltip: "74%" },
+  { label: "T", value: 55, type: "solid-light" }, // Default highlighted in mockup (74% / 55%)
   { label: "W", value: 90, type: "solid-dark" },
   { label: "T", value: 45, type: "striped" },
   { label: "F", value: 60, type: "striped" },
@@ -20,10 +20,33 @@ const BARS: BarData[] = [
 ];
 
 export function AssetAnalytics() {
+  // Default to index 2 (Tuesday) to match Donezo design layout initially
+  const [activeIndex, setActiveIndex] = useState<number | null>(2);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const relativeX = e.clientX - rect.left;
+    
+    // Divide container width by number of bars
+    const barWidth = rect.width / BARS.length;
+    const hoveredIdx = Math.floor(relativeX / barWidth);
+    
+    // Clamp index between 0 and BARS.length - 1
+    const clampedIdx = Math.max(0, Math.min(BARS.length - 1, hoveredIdx));
+    setActiveIndex(clampedIdx);
+  };
+
+  const handleMouseLeave = () => {
+    // Return to Tuesday (index 2) by default when mouse leaves
+    setActiveIndex(2);
+  };
+
   return (
-    <div className="rounded-2xl border border-[#EAECF0] bg-white p-5 shadow-sm flex flex-col justify-between h-[280px]">
+    <div className="rounded-2xl border border-[#EAECF0] bg-white p-5 shadow-sm flex flex-col justify-between h-[280px] select-none">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-2">
         <div className="space-y-0.5">
           <h3 className="text-[15px] font-bold text-[#0F1117]">Asset Analytics</h3>
           <p className="text-[12px] text-[#6B7280]">Weekly utilization performance</p>
@@ -33,49 +56,94 @@ export function AssetAnalytics() {
         </button>
       </div>
 
+      {/* SVG Definitions for patterns */}
+      <svg className="absolute h-0 w-0">
+        <defs>
+          <pattern id="diagonalHatchActive" width="10" height="10" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="0" x2="0" y2="10" stroke="#059669" strokeWidth="3" />
+          </pattern>
+          <pattern id="diagonalHatchInactive" width="10" height="10" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="0" x2="0" y2="10" stroke="#CBD5E1" strokeWidth="2.5" />
+          </pattern>
+        </defs>
+      </svg>
+
       {/* Chart container */}
-      <div className="relative flex-1 flex items-end justify-between px-2 pt-6 pb-2">
-        {/* Striped pattern SVG definition */}
-        <svg className="absolute h-0 w-0">
-          <defs>
-            <pattern id="diagonalHatch" width="10" height="10" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
-              <line x1="0" y1="0" x2="0" y2="10" stroke="#CBD5E1" strokeWidth="2.5" />
-            </pattern>
-          </defs>
-        </svg>
+      <div
+        ref={containerRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className="relative flex-1 flex items-end justify-between px-2 pt-10 pb-2 cursor-crosshair"
+      >
+        {/* Render a vertical guide/pointer line behind the active bar */}
+        {activeIndex !== null && (
+          <div
+            className="absolute top-2 bottom-8 w-[1px] border-l border-dashed border-[#059669]/30 transition-all duration-300 pointer-events-none"
+            style={{
+              left: `${((activeIndex + 0.5) / BARS.length) * 100}%`,
+              transform: "translateX(-50%)",
+            }}
+          />
+        )}
 
         {BARS.map((bar, idx) => {
           const isStriped = bar.type === "striped";
           const isLight = bar.type === "solid-light";
+          const isActive = activeIndex === idx;
+
+          // Compute a dynamic display value for the tooltip (e.g. mapping value to percentage)
+          // Tuesday displays 74% in Donezo mockup, let's use that pattern
+          const displayPct = idx === 2 ? 74 : Math.round(bar.value * 0.95);
 
           return (
-            <div key={idx} className="flex flex-col items-center gap-2.5 flex-1 relative group">
-              {/* Bar */}
-              <div className="w-9 h-36 flex items-end relative">
-                {/* Background path or hover outline */}
-                <div
-                  className="w-full rounded-full transition-all duration-300"
-                  style={{
-                    height: `${bar.value}%`,
-                    background: isStriped
-                      ? "url(#diagonalHatch)"
-                      : isLight
-                      ? "#3CA079"
-                      : "#064E3B",
-                  }}
-                />
-
-                {/* Tooltip on Tuesday bar or hovered bar */}
-                {bar.tooltip && (
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#064E3B] text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-md animate-bounce">
-                    {bar.tooltip}
+            <div
+              key={idx}
+              className="flex flex-col items-center gap-2 flex-1 relative transition-all duration-300"
+              style={{
+                opacity: activeIndex === null || isActive ? 1 : 0.45,
+              }}
+            >
+              {/* Bar wrapper */}
+              <div className="w-9 h-36 flex items-end relative justify-center">
+                {/* Tooltip positioned smoothly above the bar */}
+                {isActive && (
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#064E3B] text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-md animate-[page-in_0.15s_ease_both] z-10 whitespace-nowrap">
+                    {displayPct}%
                     <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#064E3B]" />
                   </div>
                 )}
+
+                {/* The Bar */}
+                <div
+                  className={`w-full rounded-full transition-all duration-300 ${
+                    isActive ? "scale-x-[1.12] shadow-sm shadow-[#064E3B]/10" : ""
+                  }`}
+                  style={{
+                    height: `${bar.value}%`,
+                    transformOrigin: "bottom center",
+                    background: isStriped
+                      ? isActive
+                        ? "url(#diagonalHatchActive)"
+                        : "url(#diagonalHatchInactive)"
+                      : isLight
+                      ? isActive
+                        ? "#10B981"
+                        : "#3CA079"
+                      : isActive
+                      ? "#059669"
+                      : "#064E3B",
+                  }}
+                />
               </div>
 
               {/* Day label */}
-              <span className="text-[11px] font-bold text-[#9CA3AF]">{bar.label}</span>
+              <span
+                className={`text-[11px] font-bold transition-colors duration-200 ${
+                  isActive ? "text-[#064E3B]" : "text-[#9CA3AF]"
+                }`}
+              >
+                {bar.label}
+              </span>
             </div>
           );
         })}
